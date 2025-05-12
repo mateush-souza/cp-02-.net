@@ -1,3 +1,7 @@
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using cp_02.Data;
+using cp_02.Controllers;
 namespace cp_02
 {
     public class Program
@@ -5,9 +9,15 @@ namespace cp_02
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+            builder.Services.AddDbContext<cp_02Context>(options =>
+                options.UseSqlServer(builder.Configuration.GetConnectionString("cp_02Context") ?? throw new InvalidOperationException("Connection string 'cp_02Context' not found.")));
 
             // Add services to the container.
             builder.Services.AddRazorPages();
+
+            builder.Services.AddEndpointsApiExplorer();
+
+            builder.Services.AddSwaggerGen();
 
             var app = builder.Build();
 
@@ -19,6 +29,11 @@ namespace cp_02
                 app.UseHsts();
             }
 
+                        if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+};
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 
@@ -27,6 +42,8 @@ namespace cp_02
             app.UseAuthorization();
 
             app.MapRazorPages();
+
+            app.MapVehicleEndpoints();
 
             app.Run();
         }
